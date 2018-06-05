@@ -1,32 +1,30 @@
-function getPrgName() {
+function getPrgName(filename) {
     let os = process.platform;
-    let filename = process.mainModule.filename;
+    filename = filename || process.mainModule.filename;
     let separator = os.match('darwin') ? '/' : (os.match('win') ? '\\' : '/');
     filename = filename.substring(filename.lastIndexOf(separator) + 1, filename.lastIndexOf('.'));
     return filename;
 }
 
-function judgeType(param) {
-    let type = typeof param;
-    if (param === null || type.match(/string|number|boolean|undefined/)) {
-        return 'basic';
+function isBasic(param, strict) {
+    if ((typeof param).match(/string|number|boolean/)) {
+        return true;
     }
-    if (param instanceof Array) {
-        return 'array';
+    if (!strict && (param === null || param === undefined)) {
+        return true;
     }
-    return 'object';
+    return false;
 }
 
 function loopVar(param, action) {
-    let type = judgeType(param);
-    if ('basic' === type) {
-        return action(param);
-    }
-    if ('array' === type) {
+    if (param instanceof Array) {
         for (let ele of param) {
             loopVar(ele);
         }
         return;
+    }
+    if (isBasic(param) || (typeof param === 'function')) {
+        return action(param);
     }
     for (let key in param) {
         loopVar(param[key]);
@@ -34,24 +32,23 @@ function loopVar(param, action) {
 }
 
 function assign(obj, attris, data) {
-    if (!(attris instanceof Array) || attris.length < 1) return;
-    if (typeof obj != 'object') return;
-    if (attris.length == 1) {
+    if (attris.length === 1) {
         obj[attris.shift()] = data;
         return;
     }
     let attri = attris.shift();
-    if (typeof obj[attri] != 'object' || obj[attri] == null) {
+    if (!(obj.hasOwnProperty(attri))) {
         obj[attri] = {};
     }
     assign(obj[attri], attris, data);
 }
 
-function multiEqual(params) {
+function equal() {
     let rst = true;
+    let params = Array.from(arguments);
     let param0 = params[0];
     for (let i = 1; i < params.length; i++) {
-        if (params[i] != param0) {
+        if (params[i] !== param0) {
             rst = false;
             break;
         }
@@ -59,32 +56,25 @@ function multiEqual(params) {
     return rst;
 }
 
-function traverse(arr, callback) {
-
-    arrIdx = arr.map(() => 0);
-    arrLen = arr.map(i => i.length - 1);
-    while (!finish()) {
+function permute(arr, callback) {
+    let finish = false;
+    let arrIdx = arr.map(() => 0);
+    let arrLen = arr.map(i => i.length - 1);
+    while (!finish) {
         callback(arrIdx);
-        nextIdxs(arrIdx.length - 1);
+        finish = nextIdxs(arrIdx.length - 1);
     }
     function nextIdxs(iidx) {
         let cur = arrIdx[iidx];
         if (cur >= arrLen[iidx]) {
-            arrIdx[iidx] = 0;
-            nextIdxs(iidx - 1);
-        } else {
-            arrIdx[iidx] = cur + 1;
-        }
-    }
-    function finish() {
-        let rst = true;
-        for (let i = 0; i < arrIdx.length; i++) {
-            if (arrIdx[i] != arrLen[i]) {
-                rst = false;
-                break;
+            if (iidx === 0) {
+                return true;
             }
+            arrIdx[iidx] = 0;
+            return nextIdxs(iidx - 1);
         }
-        return rst;
+        arrIdx[iidx] = cur + 1;
+        return false;
     }
 }
 
@@ -98,4 +88,17 @@ function unicode(str) {
     }).join('');
 }
 
-module.exports = { getPrgName };
+function sortKey(obj) {
+    return Object.keys(obj).sort();
+}
+
+module.exports = {
+    getPrgName,
+    isBasic,
+    loopVar,
+    assign,
+    equal,
+    permute,
+    unicode,
+    sortKey
+};
