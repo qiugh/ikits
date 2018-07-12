@@ -1,32 +1,25 @@
-let moment = require('moment');
 let fs = require('fs');
 let path = require('path');
+let moment = require('moment');
 let logger = require('winston');
+let rotateFile = require('winston-daily-rotate-file');
+
 let defaultEnv = 'production';
 
-function getLogger(options, logType) {
+function getLogger(options) {
     let logOptions = {
-        handleExceptions: ((process.env.NODE_ENV || defaultEnv) === defaultEnv),
-        timestamp: time
+        timestamp: time,
+        localTime: true,
+        datePattern: options.datePattern || 'YYYY-MM-DD',
+        handleExceptions: ((process.env.NODE_ENV || defaultEnv) === defaultEnv)
     }
-    logType = logType || 1;
-    let type = logger.transports.File;
-    let prgName = options.prgName || getPrgName();
-    let filename = './' + prgName + '.log.' + time(options.datePattern);
-
-    if (logType !== 1) {
-        logOptions.localTime = true;
-        logOptions.datePattern = options.datePattern;
-        type = require('winston-daily-rotate-file');
-        filename = './' + prgName + '.log';
-    }
-
+    let filename = './' + (options.prgName || getPrgName()) + '.log';
     let dir = path.resolve('./', (options.logDir || '../log/'));
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }
     logOptions.filename = path.resolve(dir, filename)
-    logger.add(type, logOptions);
+    logger.add(rotateFile, logOptions);
     logger.level = options.logLevel || 'info';
     logger.cli();
     return logger;
@@ -243,10 +236,12 @@ module.exports = {
     enable,
     equal,
     fillJson,
+    getLogger,
     getPrgName,
     isBasic,
     loopVar,
     overrideJson,
     permute,
+    time,
     unicode
 };
