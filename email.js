@@ -15,8 +15,13 @@ function sendMail(to, text, subject) {
         text: text,
         subject: subject,
         from: "finform@163.com"
-    }, function () {
-        transport.close();
+    }, function (err) {
+        if (err) {
+            console.error(err);
+        }
+        if (transport) {
+            transport.close();
+        }
     });
 }
 

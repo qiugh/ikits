@@ -1,17 +1,25 @@
 {
   "name": "ikits",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.0.3",
+  "description": "a small-scale tool kit",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qiugh/ikits.git"
+  },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qiugh/ikits/issues"
+  },
+  "homepage": "https://github.com/qiugh/ikits#readme",
   "dependencies": {
-    "moment": "^2.22.1",
-    "nodemailer": "^4.6.5",
-    "winston": "^2.4.2",
-    "winston-daily-rotate-file": "^3.2.1"
+    "moment": "^2.22.2",
+    "nodemailer": "^4.6.7",
+    "winston": "^3.0.0",
+    "winston-daily-rotate-file": "^3.2.3"
   }
 }
