@@ -192,7 +192,7 @@ function _mergeJsonByMaster(master, slave) {
 function divideJson(master, slave) {
     let options = {};
     for (let skey in slave) {
-        if (slave.hasOwnProperty(skey) && master.hasOwnProperty(key)) {
+        if (slave.hasOwnProperty(skey) && master.hasOwnProperty(skey)) {
             options[skey] = master[skey];
             delete master[skey];
         }
@@ -239,6 +239,7 @@ module.exports = {
     getLogger,
     getPrgName,
     isBasic,
+    isObject,
     loopVar,
     overrideJson,
     permute,
