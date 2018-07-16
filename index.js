@@ -230,12 +230,22 @@ function _mergeJsonBySlave(master, slave) {
     return master;
 }
 
+function getFuncName() {
+    let caller = arguments.callee.caller;
+    let name = caller.toString().match(/function(.*)\(/);
+    if (name && name[1].trim() !== '') {
+        return name[1].trim();
+    }
+    return null;
+}
+
 module.exports = {
     assign,
     divideJson,
     enable,
     equal,
     fillJson,
+    getFuncName,
     getLogger,
     getPrgName,
     isBasic,
