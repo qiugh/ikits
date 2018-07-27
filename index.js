@@ -4,14 +4,12 @@ let moment = require('moment');
 let logger = require('winston');
 let rotateFile = require('winston-daily-rotate-file');
 
-let defaultEnv = 'production';
-
 function getLogger(options) {
     let logOptions = {
         timestamp: time,
         localTime: true,
         datePattern: options.datePattern || 'YYYY-MM-DD',
-        handleExceptions: ((process.env.NODE_ENV || defaultEnv) === defaultEnv)
+        handleExceptions: process.env.NODE_ENV === 'production'
     }
     let filename = './' + (options.prgName || getPrgName()) + '.log';
     let dir = path.resolve('./', (options.logDir || '../log/'));
@@ -126,24 +124,30 @@ function unicode(str) {
 function isObject(param) {
     if (typeof param !== 'object' || param === null)
         return false;
-    return true
+    return true;
 }
 
-
-
-function enable(obj, propertyName, level, initValue) {
-    level = (level === 2) ? 2 : 1;
-    let key = '_' + propertyName;
-    if (level === 1) {
-        obj[key] = initValue;
-        obj[propertyName] = function (value) {
-            if (arguments.length === 0)
-                return obj[key];
-            if (arguments.length === 1)
-                obj[key] = value;
-        }
-        return;
+function enable(obj, propertyName, type, initValue) {
+    if (type === 2) {
+        enablePropertySet(obj, propertyName, initValue)
+    } else {
+        enableProperty(obj, propertyName, initValue)
     }
+}
+
+function enableProperty(obj, propertyName, initValue) {
+    let key = '_' + propertyName;
+    obj[key] = initValue;
+    obj[propertyName] = function (value) {
+        if (arguments.length === 0)
+            return obj[key];
+        if (arguments.length === 1)
+            obj[key] = value;
+    }
+}
+
+function enablePropertySet(obj, propertyName, initValue) {
+    let key = '_' + propertyName;
     if (!isObject(obj[key])) {
         if (isObject(initValue)) {
             obj[key] = initValue;
@@ -179,11 +183,11 @@ function _mergeJsonByMaster(master, slave) {
     }
     for (let skey in slave) {
         if (slave.hasOwnProperty(skey)) {
-            if (!master.hasOwnProperty(skey)) {
-                master[skey] = (typeof slave[skey] === 'object') ? JSON.parse(JSON.stringify(slave[skey])) : slave[skey];
+            if (master.hasOwnProperty(skey)) {
+                master[skey] = _mergeJsonByMaster(master[skey], slave[skey]);
                 continue;
             }
-            master[skey] = _mergeJsonByMaster(master[skey], slave[skey]);
+            master[skey] = isObject(slave[skey]) ? JSON.parse(JSON.stringify(slave[skey])) : slave[skey];
         }
     }
     return master;
