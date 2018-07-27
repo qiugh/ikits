@@ -17,8 +17,12 @@ function getLogger(options) {
         fs.mkdirSync(dir);
     }
     logOptions.filename = path.resolve(dir, filename)
-    logger.add(rotateFile, logOptions);
-    logger.level = options.logLevel || 'info';
+    logger.configure({
+        level: options.logLevel || 'info',
+        transports: [
+            new rotateFile(logOptions)
+        ]
+    });
     logger.cli();
     return logger;
 }
