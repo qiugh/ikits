@@ -32,15 +32,6 @@ class Flow {
             returnXargs: this.returnXargs
         }, callback);
     }
-
-    filter(filterFunc) {
-        let processors = this.processors.filter(filterFunc);
-        let filterFlow = new Flow();
-        filterFlow.ignoreError = this.ignoreError;
-        filterFlow.returnXargs = this.returnXargs;
-        filterFlow.processors = processors;
-        return filterFlow;
-    }
 }
 
 class Processor {
@@ -91,7 +82,7 @@ function asynFlow(options, callback) {
     let xargStep = (xargs.length == 1) ? ((funcs.length == 1) ? 1 : 0) : 1;
 
     executeFuncs();
-    
+
     function executeFuncs() {
         if (funcIdx >= funcs.length || xargIdx >= xargs.length)
             return callCb();
